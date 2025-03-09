@@ -93,6 +93,13 @@ public class FabricMod implements Mod {
 			allowsUpdateChecks = CustomValueUtil.getBoolean("update_checker", modMenuObject).orElse(true);
 		}
 
+		boolean isGenerated = CustomValueUtil.getBoolean("fabric-loom:generated", metadata).orElse(false);
+
+		/* Automatically set the mod containing a Loom-generated library as its parent */
+		if (isGenerated && parentId.isEmpty() && container.getContainingMod().isPresent()) {
+			ModContainer inside = container.getContainingMod().get();
+			parentId = Optional.of(inside.getMetadata().getId());
+		}
 		this.modMenuData = new ModMenuData(badgeNames, parentId, parentData, id);
 
 		/* Hardcode parents and badges for Fabric API & Fabric Loader */
@@ -119,10 +126,7 @@ public class FabricMod implements Mod {
 			badges.add(Badge.CLIENT);
 		}
 
-		if (OptionalUtil.isPresentAndTrue(CustomValueUtil.getBoolean(
-			"fabric-loom:generated",
-			metadata
-		)) || "java".equals(id)) {
+		if (isGenerated || "java".equals(id)) {
 			badges.add(Badge.LIBRARY);
 		}
 
