@@ -236,6 +236,7 @@ public class ModsScreen extends Screen {
 			this.height - RIGHT_PANE_Y - 96,
 			RIGHT_PANE_Y + 60,
 			textRenderer.fontHeight + 1,
+			this.descriptionListWidget,
 			this
 		);
 		this.descriptionListWidget.setX(this.rightPaneX);
@@ -247,7 +248,7 @@ public class ModsScreen extends Screen {
 		ClickableWidget doneButton = ButtonWidget.builder(ScreenTexts.DONE, button -> client.setScreen(previousScreen)).position(this.width / 2 + 4, this.height - 28).size(150, 20).build();
 
 		// Initialize data
-		modList.reloadFilters();
+		modList.finalizeInit();
 		this.setFilterOptionsShown(this.keepFilterOptionsShown && this.filterOptionsShown);
 
 		// Add children
@@ -521,35 +522,38 @@ public class ModsScreen extends Screen {
 	}
 
 	public void updateSelectedEntry(ModListEntry entry) {
-		if (entry != null) {
-			this.selected = entry;
-			String modId = selected.getMod().getId();
-			if (this.configureButton != null) {
-				this.configureButton.active = getModHasConfigScreen(modId);
-				this.configureButton.visible = selected != null && getModHasConfigScreen(modId) || modScreenErrors.containsKey(modId);
-				if (modScreenErrors.containsKey(modId)) {
-					Throwable e = modScreenErrors.get(modId);
-					this.configureButton.setTooltip(Tooltip.of(ModMenuScreenTexts.configureError(modId, e)));
-				} else {
-					this.configureButton.setTooltip(Tooltip.of(ModMenuScreenTexts.CONFIGURE));
-				}
-			}
-
-			var isMinecraft = modId.equals("minecraft");
-			if (isMinecraft) {
-				this.websiteButton.setMessage(SEND_FEEDBACK_TEXT);
-				this.issuesButton.setMessage(REPORT_BUGS_TEXT);
-			} else {
-				this.websiteButton.setMessage(ModMenuScreenTexts.WEBSITE);
-				this.issuesButton.setMessage(ModMenuScreenTexts.ISSUES);
-			}
-
-			this.websiteButton.visible = true;
-			this.websiteButton.active = isMinecraft || selected.getMod().getWebsite() != null;
-
-			this.issuesButton.visible = true;
-			this.issuesButton.active = isMinecraft || selected.getMod().getIssueTracker() != null;
+		if (entry == null) {
+			return;
 		}
+
+		this.selected = entry;
+		String modId = selected.getMod().getId();
+
+		this.descriptionListWidget.updateSelectedModIfRequired(selected.getMod());
+
+		if (this.configureButton != null) {
+
+			this.configureButton.active = getModHasConfigScreen(modId);
+			this.configureButton.visible =
+				selected != null && getModHasConfigScreen(modId) || modScreenErrors.containsKey(modId);
+
+			if (modScreenErrors.containsKey(modId)) {
+				Throwable e = modScreenErrors.get(modId);
+				this.configureButton.setTooltip(Tooltip.of(ModMenuScreenTexts.configureError(modId, e)));
+			} else {
+				this.configureButton.setTooltip(Tooltip.of(ModMenuScreenTexts.CONFIGURE));
+			}
+		}
+
+		boolean isMinecraft = modId.equals("minecraft");
+		this.websiteButton.setMessage(isMinecraft ? SEND_FEEDBACK_TEXT : ModMenuScreenTexts.WEBSITE);
+		this.issuesButton.setMessage(isMinecraft ? REPORT_BUGS_TEXT : ModMenuScreenTexts.ISSUES);
+
+		this.websiteButton.visible = true;
+		this.websiteButton.active = isMinecraft || selected.getMod().getWebsite() != null;
+
+		this.issuesButton.visible = true;
+		this.issuesButton.active = isMinecraft || selected.getMod().getIssueTracker() != null;
 	}
 
 	public double getScrollPercent() {
