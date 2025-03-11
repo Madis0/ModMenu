@@ -1,6 +1,5 @@
 package com.terraformersmc.modmenu.gui.widget;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.terraformersmc.modmenu.api.UpdateInfo;
 import com.terraformersmc.modmenu.config.ModMenuConfig;
@@ -9,9 +8,7 @@ import com.terraformersmc.modmenu.gui.widget.entries.ModListEntry;
 import com.terraformersmc.modmenu.util.mod.Mod;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gl.GlUsage;
-import net.minecraft.client.gl.ShaderProgramKeys;
-import net.minecraft.client.gl.VertexBuffer;
+import net.minecraft.client.gl.*;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
@@ -26,29 +23,20 @@ import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget.DescriptionEntry> {
-
 	private static final Text HAS_UPDATE_TEXT = Text.translatable("modmenu.hasUpdate");
 	private static final Text EXPERIMENTAL_TEXT = Text.translatable("modmenu.experimental").formatted(Formatting.GOLD);
-	private static final Text DOWNLOAD_TEXT = Text.translatable("modmenu.downloadLink")
-		.formatted(Formatting.BLUE)
-		.formatted(Formatting.UNDERLINE);
+	private static final Text DOWNLOAD_TEXT = Text.translatable("modmenu.downloadLink").formatted(Formatting.BLUE).formatted(Formatting.UNDERLINE);
 	private static final Text CHILD_HAS_UPDATE_TEXT = Text.translatable("modmenu.childHasUpdate");
 	private static final Text LINKS_TEXT = Text.translatable("modmenu.links");
-	private static final Text SOURCE_TEXT = Text.translatable("modmenu.source")
-		.formatted(Formatting.BLUE)
-		.formatted(Formatting.UNDERLINE);
+	private static final Text SOURCE_TEXT = Text.translatable("modmenu.source").formatted(Formatting.BLUE).formatted(Formatting.UNDERLINE);
 	private static final Text LICENSE_TEXT = Text.translatable("modmenu.license");
-	private static final Text VIEW_CREDITS_TEXT = Text.translatable("modmenu.viewCredits")
-		.formatted(Formatting.BLUE)
-		.formatted(Formatting.UNDERLINE);
+	private static final Text VIEW_CREDITS_TEXT = Text.translatable("modmenu.viewCredits").formatted(Formatting.BLUE).formatted(Formatting.UNDERLINE);
 	private static final Text CREDITS_TEXT = Text.translatable("modmenu.credits");
 
 	private final ModsScreen parent;
@@ -90,7 +78,7 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 	}
 
 	@Override
-	public void renderList(DrawContext DrawContext, int mouseX, int mouseY, float delta) {
+	public void renderList(DrawContext drawContext, int mouseX, int mouseY, float delta) {
 		ModListEntry selectedEntry = parent.getSelectedEntry();
 		if (selectedEntry != lastSelected) {
 			lastSelected = selectedEntry;
@@ -108,12 +96,10 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 					}
 				}
 
-				if (ModMenuConfig.UPDATE_CHECKER.getValue() && !ModMenuConfig.DISABLE_UPDATE_CHECKER.getValue()
-					.contains(mod.getId())) {
+				if (ModMenuConfig.UPDATE_CHECKER.getValue() && !ModMenuConfig.DISABLE_UPDATE_CHECKER.getValue().contains(mod.getId())) {
 					UpdateInfo updateInfo = mod.getUpdateInfo();
 					if (updateInfo != null && updateInfo.isUpdateAvailable()) {
 						children().add(emptyEntry);
-
 						int index = 0;
 						for (OrderedText line : textRenderer.wrapLines(HAS_UPDATE_TEXT, wrapWidth - 11)) {
 							DescriptionEntry entry = new DescriptionEntry(line);
@@ -129,30 +115,27 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 							children().add(new DescriptionEntry(line, 8));
 						}
 
-
 						Text updateMessage = updateInfo.getUpdateMessage();
 						String downloadLink = updateInfo.getDownloadLink();
 						if (updateMessage == null) {
 							updateMessage = DOWNLOAD_TEXT;
 						} else {
 							if (downloadLink != null) {
-								updateMessage = updateMessage.copy()
-									.formatted(Formatting.BLUE)
-									.formatted(Formatting.UNDERLINE);
+								updateMessage = updateMessage.copy().formatted(Formatting.BLUE).formatted(Formatting.UNDERLINE);
 							}
 						}
+
 						for (OrderedText line : textRenderer.wrapLines(updateMessage, wrapWidth - 16)) {
 							if (downloadLink != null) {
 								children().add(new LinkEntry(line, downloadLink, 8));
 							} else {
 								children().add(new DescriptionEntry(line, 8));
-
 							}
 						}
 					}
+
 					if (mod.getChildHasUpdate()) {
 						children().add(emptyEntry);
-
 						int index = 0;
 						for (OrderedText line : textRenderer.wrapLines(CHILD_HAS_UPDATE_TEXT, wrapWidth - 11)) {
 							DescriptionEntry entry = new DescriptionEntry(line);
@@ -170,7 +153,6 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 				String sourceLink = mod.getSource();
 				if ((!links.isEmpty() || sourceLink != null) && !ModMenuConfig.HIDE_MOD_LINKS.getValue()) {
 					children().add(emptyEntry);
-
 					for (OrderedText line : textRenderer.wrapLines(LINKS_TEXT, wrapWidth)) {
 						children().add(new DescriptionEntry(line));
 					}
@@ -185,11 +167,7 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 
 					links.forEach((key, value) -> {
 						int indent = 8;
-						for (OrderedText line : textRenderer.wrapLines(Text.translatable(key)
-								.formatted(Formatting.BLUE)
-								.formatted(Formatting.UNDERLINE),
-							wrapWidth - 16
-						)) {
+						for (OrderedText line : textRenderer.wrapLines(Text.translatable(key).formatted(Formatting.BLUE).formatted(Formatting.UNDERLINE), wrapWidth - 16)) {
 							children().add(new LinkEntry(line, value, indent));
 							indent = 16;
 						}
@@ -199,7 +177,6 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 				Set<String> licenses = mod.getLicense();
 				if (!ModMenuConfig.HIDE_MOD_LICENSE.getValue() && !licenses.isEmpty()) {
 					children().add(emptyEntry);
-
 					for (OrderedText line : textRenderer.wrapLines(LICENSE_TEXT, wrapWidth)) {
 						children().add(new DescriptionEntry(line));
 					}
@@ -216,38 +193,29 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 				if (!ModMenuConfig.HIDE_MOD_CREDITS.getValue()) {
 					if ("minecraft".equals(mod.getId())) {
 						children().add(emptyEntry);
-
 						for (OrderedText line : textRenderer.wrapLines(VIEW_CREDITS_TEXT, wrapWidth)) {
 							children().add(new MojangCreditsEntry(line));
 						}
 					} else if (!"java".equals(mod.getId())) {
 						var credits = mod.getCredits();
-
 						if (!credits.isEmpty()) {
 							children().add(emptyEntry);
-
 							for (OrderedText line : textRenderer.wrapLines(CREDITS_TEXT, wrapWidth)) {
 								children().add(new DescriptionEntry(line));
 							}
 
 							var iterator = credits.entrySet().iterator();
-
 							while (iterator.hasNext()) {
 								int indent = 8;
 
 								var role = iterator.next();
-								var roleName = role.getKey();
-
-								for (var line : textRenderer.wrapLines(this.creditsRoleText(roleName),
-									wrapWidth - 16
-								)) {
+								for (var line : textRenderer.wrapLines(this.creditsRoleText(role.getKey()), wrapWidth - 16)) {
 									children().add(new DescriptionEntry(line, indent));
 									indent = 16;
 								}
 
 								for (var contributor : role.getValue()) {
 									indent = 16;
-
 									for (var line : textRenderer.wrapLines(Text.literal(contributor), wrapWidth - 24)) {
 										children().add(new DescriptionEntry(line, indent));
 										indent = 24;
@@ -264,89 +232,37 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 			}
 		}
 
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder bufferBuilder;
-		BuiltBuffer builtBuffer;
+		this.enableScissor(drawContext);
+		super.renderList(drawContext, mouseX, mouseY, delta);
+		drawContext.disableScissor();
 
-		//		{
-		//			RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
-		//			RenderSystem.setShaderTexture(0, Screen.OPTIONS_BACKGROUND_TEXTURE);
-		//			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		//			bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
-		//			bufferBuilder.vertex(this.getX(), this.getBottom(), 0.0D).texture(this.getX() / 32.0F, (this.getBottom() + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255);
-		//			bufferBuilder.vertex(this.getRight(), this.getBottom(), 0.0D).texture(this.getRight() / 32.0F, (this.getBottom() + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255);
-		//			bufferBuilder.vertex(this.getRight(), this.getY(), 0.0D).texture(this.getRight() / 32.0F, (this.getY() + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255);
-		//			bufferBuilder.vertex(this.getX(), this.getY(), 0.0D).texture(this.getX() / 32.0F, (this.getY() + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255);
-		//			tessellator.draw();
-		//		}
-
-		this.enableScissor(DrawContext);
-		super.renderList(DrawContext, mouseX, mouseY, delta);
-		DrawContext.disableScissor();
-
-		RenderSystem.depthFunc(515);
-		RenderSystem.disableDepthTest();
-		RenderSystem.enableBlend();
-		RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA,
-			GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA,
-			GlStateManager.SrcFactor.ZERO,
-			GlStateManager.DstFactor.ONE
-		);
-//		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-		RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
-
-		bufferBuilder = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-		bufferBuilder.vertex(this.getX(), (this.getY() + 4), 0.0F).
-
-			color(0, 0, 0, 0);
-
-		bufferBuilder.vertex(this.getRight(), (this.getY() + 4), 0.0F).
-
-			color(0, 0, 0, 0);
-
-		bufferBuilder.vertex(this.getRight(), this.getY(), 0.0F).
-
-			color(0, 0, 0, 255);
-
-		bufferBuilder.vertex(this.getX(), this.getY(), 0.0F).
-
-			color(0, 0, 0, 255);
-
-		bufferBuilder.vertex(this.getX(), this.getBottom(), 0.0F).
-
-			color(0, 0, 0, 255);
-
-		bufferBuilder.vertex(this.getRight(), this.getBottom(), 0.0F).
-
-			color(0, 0, 0, 255);
-
-		bufferBuilder.vertex(this.getRight(), (this.getBottom() - 4), 0.0F).
-
-			color(0, 0, 0, 0);
-
-		bufferBuilder.vertex(this.getX(), (this.getBottom() - 4), 0.0F).
-
-			color(0, 0, 0, 0);
-
-		try {
-			builtBuffer = bufferBuilder.end();
-
-			try (VertexBuffer vertexBuffer = new VertexBuffer(GlUsage.STATIC_WRITE)) {
-				vertexBuffer.bind();
-				vertexBuffer.upload(builtBuffer);
-				vertexBuffer.draw(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
-				builtBuffer.close();
+		BufferBuilder bufferBuilder = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+		final int black = ColorHelper.fullAlpha(0);
+		bufferBuilder.vertex(this.getX(), (this.getY() + 4), 0.0F).color(0);
+		bufferBuilder.vertex(this.getRight(), (this.getY() + 4), 0.0F).color(0);
+		bufferBuilder.vertex(this.getRight(), this.getY(), 0.0F).color(black);
+		bufferBuilder.vertex(this.getX(), this.getY(), 0.0F).color(black);
+		bufferBuilder.vertex(this.getX(), this.getBottom(), 0.0F).color(black);
+		bufferBuilder.vertex(this.getRight(), this.getBottom(), 0.0F).color(black);
+		bufferBuilder.vertex(this.getRight(), (this.getBottom() - 4), 0.0F).color(0);
+		bufferBuilder.vertex(this.getX(), (this.getBottom() - 4), 0.0F).color(0);
+		this.renderScrollBar(bufferBuilder);
+		try (BuiltBuffer builtBuffer = bufferBuilder.end()) {
+			VertexFormat.DrawMode drawMode = builtBuffer.getDrawParameters().mode();
+			Framebuffer framebuffer = MinecraftClient.getInstance().getFramebuffer();
+			try (RenderPass renderPass = RenderSystem.getDevice().getResourceManager().newRenderPass(framebuffer.getColorAttachment(), OptionalInt.empty(), framebuffer.getDepthAttachment(), OptionalDouble.empty());
+				 GpuBuffer gpuBuffer = RenderSystem.getDevice().createBuffer(() -> "Description List", GlBufferTarget.VERTICES, GlUsage.DYNAMIC_WRITE, 786432)) {
+				RenderSystem.ShapeIndexBuffer autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(drawMode);
+				renderPass.bindShader(ShaderPipelines.GUI);
+				renderPass.setVertexBuffer(0, gpuBuffer);
+				renderPass.setIndexBuffer(autoStorageIndexBuffer.getIndexBuffer(builtBuffer.getDrawParameters().indexCount()), autoStorageIndexBuffer.getIndexType());
+				RenderSystem.getDevice().getResourceManager().copyDataInto(gpuBuffer, builtBuffer.getBuffer(), 0);
+				renderPass.drawObjects(0, builtBuffer.getDrawParameters().indexCount());
 			}
-		} catch (Exception e) {
-			// Ignored
 		}
-		this.renderScrollBar(bufferBuilder, tessellator);
-
-		RenderSystem.disableBlend();
 	}
 
-	public void renderScrollBar(BufferBuilder bufferBuilder, Tessellator tessellator) {
-		BuiltBuffer builtBuffer;
+	public void renderScrollBar(BufferBuilder bufferBuilder) {
 		int scrollbarStartX = this.getScrollbarX();
 		int scrollbarEndX = scrollbarStartX + 6;
 		int maxScroll = this.getMaxScrollY();
@@ -358,31 +274,21 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 				q = this.getY();
 			}
 
-			bufferBuilder = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-			bufferBuilder.vertex(scrollbarStartX, this.getBottom(), 0.0F).color(0, 0, 0, 255);
-			bufferBuilder.vertex(scrollbarEndX, this.getBottom(), 0.0F).color(0, 0, 0, 255);
-			bufferBuilder.vertex(scrollbarEndX, this.getY(), 0.0F).color(0, 0, 0, 255);
-			bufferBuilder.vertex(scrollbarStartX, this.getY(), 0.0F).color(0, 0, 0, 255);
-			bufferBuilder.vertex(scrollbarStartX, q + p, 0.0F).color(128, 128, 128, 255);
-			bufferBuilder.vertex(scrollbarEndX, q + p, 0.0F).color(128, 128, 128, 255);
-			bufferBuilder.vertex(scrollbarEndX, q, 0.0F).color(128, 128, 128, 255);
-			bufferBuilder.vertex(scrollbarStartX, q, 0.0F).color(128, 128, 128, 255);
-			bufferBuilder.vertex(scrollbarStartX, q + p - 1, 0.0F).color(192, 192, 192, 255);
-			bufferBuilder.vertex(scrollbarEndX - 1, q + p - 1, 0.0F).color(192, 192, 192, 255);
-			bufferBuilder.vertex(scrollbarEndX - 1, q, 0.0F).color(192, 192, 192, 255);
-			bufferBuilder.vertex(scrollbarStartX, q, 0.0F).color(192, 192, 192, 255);
-			try {
-				builtBuffer = bufferBuilder.end();
-
-				try (VertexBuffer vertexBuffer = new VertexBuffer(GlUsage.STATIC_WRITE)) {
-					vertexBuffer.bind();
-					vertexBuffer.upload(builtBuffer);
-					vertexBuffer.draw(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
-					builtBuffer.close();
-				}
-			} catch (Exception e) {
-				// Ignored
-			}
+			final int black = ColorHelper.fullAlpha(0);
+			final int firstColor = ColorHelper.fromFloats(255, 128, 128, 128);
+			final int lastColor = ColorHelper.fromFloats(255, 192, 192, 192);
+			bufferBuilder.vertex(scrollbarStartX, this.getBottom(), 0.0F).color(black);
+			bufferBuilder.vertex(scrollbarEndX, this.getBottom(), 0.0F).color(black);
+			bufferBuilder.vertex(scrollbarEndX, this.getY(), 0.0F).color(black);
+			bufferBuilder.vertex(scrollbarStartX, this.getY(), 0.0F).color(black);
+			bufferBuilder.vertex(scrollbarStartX, q + p, 0.0F).color(firstColor);
+			bufferBuilder.vertex(scrollbarEndX, q + p, 0.0F).color(firstColor);
+			bufferBuilder.vertex(scrollbarEndX, q, 0.0F).color(firstColor);
+			bufferBuilder.vertex(scrollbarStartX, q, 0.0F).color(firstColor);
+			bufferBuilder.vertex(scrollbarStartX, q + p - 1, 0.0F).color(lastColor);
+			bufferBuilder.vertex(scrollbarEndX - 1, q + p - 1, 0.0F).color(lastColor);
+			bufferBuilder.vertex(scrollbarEndX - 1, q, 0.0F).color(lastColor);
+			bufferBuilder.vertex(scrollbarStartX, q, 0.0F).color(lastColor);
 		}
 	}
 
@@ -390,13 +296,10 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 		// Replace spaces and dashes in role names with underscores if they exist
 		// Notably Quilted Fabric API does this with FabricMC as "Upstream Owner"
 		var translationKey = roleName.replaceAll("[ -]", "_").toLowerCase();
-
 		// Add an s to the default untranslated string if it ends in r since this
 		// Fixes common role names people use in English (e.g. Author -> Authors)
 		var fallback = roleName.endsWith("r") ? roleName + "s" : roleName;
-
-		return Text.translatableWithFallback("modmenu.credits.role." + translationKey, fallback)
-			.append(Text.literal(":"));
+		return Text.translatableWithFallback("modmenu.credits.role." + translationKey, fallback).append(Text.literal(":"));
 	}
 
 	protected class DescriptionEntry extends ElementListWidget.Entry<DescriptionEntry> {
@@ -420,7 +323,7 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 
 		@Override
 		public void render(
-			DrawContext DrawContext,
+			DrawContext drawContext,
 			int index,
 			int y,
 			int x,
@@ -432,10 +335,11 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 			float delta
 		) {
 			if (updateTextEntry) {
-				UpdateAvailableBadge.renderBadge(DrawContext, x + indent, y);
+				UpdateAvailableBadge.renderBadge(drawContext, x + indent, y);
 				x += 11;
 			}
-			DrawContext.drawTextWithShadow(textRenderer, text, x + indent, y, 0xAAAAAA);
+
+			drawContext.drawTextWithShadow(textRenderer, text, x + indent, y, 0xAAAAAA);
 		}
 
 		@Override
@@ -459,6 +363,7 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 			if (isMouseOver(mouseX, mouseY)) {
 				client.setScreen(new MinecraftCredits());
 			}
+
 			return super.mouseClicked(mouseX, mouseY, button);
 		}
 
@@ -491,8 +396,8 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 					client.setScreen(parent);
 				}, link, false));
 			}
+
 			return super.mouseClicked(mouseX, mouseY, button);
 		}
 	}
-
 }

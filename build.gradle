@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.8-SNAPSHOT'
+	id 'fabric-loom' version '1.10-SNAPSHOT'
 }
 
 apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/2.7/ferry.gradle'
@@ -26,10 +26,12 @@ repositories {
 		name = 'TerraformersMC'
 		url = 'https://maven.terraformersmc.com/'
 	}
+
 	maven {
 		name = 'Quilt'
 		url = 'https://maven.quiltmc.org/repository/release'
 	}
+
 	maven {
 		name = 'Nucleoid'
 		url = 'https://maven.nucleoid.xyz/'
