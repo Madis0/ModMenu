@@ -35,7 +35,9 @@ public class ModBadgeRenderer {
 			drawContext,
 			badge.getText().asOrderedText(),
 			badge.getOutlineColor(),
-			badge.getFillColor()
+			badge.getFillColor(),
+			mouseX,
+			mouseY
 		);
 	}
 
@@ -43,11 +45,13 @@ public class ModBadgeRenderer {
 		DrawContext drawContext,
 		OrderedText text,
 		int outlineColor,
-		int fillColor
+		int fillColor,
+		int mouseX,
+		int mouseY
 	) {
 		int width = client.textRenderer.getWidth(text) + 6;
 		if (badgeX + width < badgeMax) {
-			DrawingUtil.drawBadge(drawContext, badgeX, badgeY, width, text, outlineColor, fillColor, 0xCACACA);
+			DrawingUtil.drawBadge(drawContext, badgeX, badgeY, width, text, outlineColor, fillColor, 0xFFCACACA);
 			badgeX += width + 3;
 		}
 	}

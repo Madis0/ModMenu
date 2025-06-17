@@ -1,7 +1,5 @@
 package com.terraformersmc.modmenu.gui.widget;
 
-import com.mojang.blaze3d.buffers.BufferType;
-import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderPass;
@@ -13,7 +11,8 @@ import com.terraformersmc.modmenu.gui.ModsScreen;
 import com.terraformersmc.modmenu.util.mod.Mod;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gl.*;
+import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
@@ -23,7 +22,8 @@ import net.minecraft.client.gui.screen.narration.NarrationPart;
 import net.minecraft.client.gui.screen.option.CreditsAndAttributionScreen;
 import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.client.gui.widget.EntryListWidget;
-import net.minecraft.client.render.*;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BuiltBuffer;
 import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
@@ -133,7 +133,6 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 					children().add(new DescriptionEntry(line, 8));
 				}
 
-
 				Text updateMessage = updateInfo.getUpdateMessage();
 				String downloadLink = updateInfo.getDownloadLink();
 				if (updateMessage == null) {
@@ -145,14 +144,15 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 							.formatted(Formatting.UNDERLINE);
 					}
 				}
+
 				for (OrderedText line : textRenderer.wrapLines(updateMessage, wrapWidth - 16)) {
 					if (downloadLink != null) {
 						children().add(new LinkEntry(line, downloadLink, 8));
 					} else {
 						children().add(new DescriptionEntry(line, 8));
-}
 					}
 				}
+			}
 
 			if (mod.getChildHasUpdate()) {
 				children().add(emptyEntry);
@@ -282,38 +282,38 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 		super.renderList(drawContext, mouseX, mouseY, delta);
 		drawContext.disableScissor();
 
-        RenderPipeline pipeline = RenderPipelines.GUI;
-        try (BufferAllocator alloc = new BufferAllocator(pipeline.getVertexFormat().getVertexSize() * 4)) {
-            BufferBuilder bufferBuilder = new BufferBuilder(alloc, pipeline.getVertexFormatMode(), pipeline.getVertexFormat());
-            final int black = ColorHelper.fullAlpha(0);
-            bufferBuilder.vertex(this.getX(), (this.getY() + 4), 0.0F).color(0);
-            bufferBuilder.vertex(this.getRight(), (this.getY() + 4), 0.0F).color(0);
-            bufferBuilder.vertex(this.getRight(), this.getY(), 0.0F).color(black);
-            bufferBuilder.vertex(this.getX(), this.getY(), 0.0F).color(black);
-            bufferBuilder.vertex(this.getX(), this.getBottom(), 0.0F).color(black);
-            bufferBuilder.vertex(this.getRight(), this.getBottom(), 0.0F).color(black);
-            bufferBuilder.vertex(this.getRight(), (this.getBottom() - 4), 0.0F).color(0);
-            bufferBuilder.vertex(this.getX(), (this.getBottom() - 4), 0.0F).color(0);
-            this.renderScrollBar(bufferBuilder);
-            try (BuiltBuffer builtBuffer = bufferBuilder.endNullable()) {
-                if (builtBuffer == null) {
-                    alloc.close();
-                    return;
-                }
-                Framebuffer framebuffer = MinecraftClient.getInstance().getFramebuffer();
-                RenderSystem.ShapeIndexBuffer autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(pipeline.getVertexFormatMode());
-                VertexFormat.IndexType indexType = autoStorageIndexBuffer.getIndexType();
-                GpuBuffer vertexBuffer = RenderSystem.getDevice().createBuffer(() -> "Description List", BufferType.VERTICES, BufferUsage.DYNAMIC_WRITE, builtBuffer.getBuffer().remaining());
-                GpuBuffer indexBuffer = autoStorageIndexBuffer.getIndexBuffer(builtBuffer.getDrawParameters().indexCount());
-                RenderSystem.getDevice().createCommandEncoder().writeToBuffer(vertexBuffer, builtBuffer.getBuffer(), 0);
-                try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(framebuffer.getColorAttachment(), OptionalInt.empty(), framebuffer.getDepthAttachment(), OptionalDouble.empty())) {
-                    renderPass.setPipeline(pipeline);
-                    renderPass.setVertexBuffer(0, vertexBuffer);
-                    renderPass.setIndexBuffer(indexBuffer, indexType);
-                    renderPass.drawIndexed(0, builtBuffer.getDrawParameters().indexCount());
-                }
-            }
-        }
+		RenderPipeline pipeline = RenderPipelines.GUI;
+		try (BufferAllocator alloc = new BufferAllocator(pipeline.getVertexFormat().getVertexSize() * 4)) {
+			BufferBuilder bufferBuilder = new BufferBuilder(alloc, pipeline.getVertexFormatMode(), pipeline.getVertexFormat());
+			final int black = 0xFF000000;
+			bufferBuilder.vertex(this.getX(), (this.getY() + 4), 0.0F).color(0);
+			bufferBuilder.vertex(this.getRight(), (this.getY() + 4), 0.0F).color(0);
+			bufferBuilder.vertex(this.getRight(), this.getY(), 0.0F).color(black);
+			bufferBuilder.vertex(this.getX(), this.getY(), 0.0F).color(black);
+			bufferBuilder.vertex(this.getX(), this.getBottom(), 0.0F).color(black);
+			bufferBuilder.vertex(this.getRight(), this.getBottom(), 0.0F).color(black);
+			bufferBuilder.vertex(this.getRight(), (this.getBottom() - 4), 0.0F).color(0);
+			bufferBuilder.vertex(this.getX(), (this.getBottom() - 4), 0.0F).color(0);
+			this.renderScrollBar(bufferBuilder);
+			try (BuiltBuffer builtBuffer = bufferBuilder.endNullable()) {
+				if (builtBuffer == null) {
+					alloc.close();
+					return;
+				}
+				Framebuffer framebuffer = MinecraftClient.getInstance().getFramebuffer();
+				RenderSystem.ShapeIndexBuffer autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(pipeline.getVertexFormatMode());
+				VertexFormat.IndexType indexType = autoStorageIndexBuffer.getIndexType();
+				GpuBuffer vertexBuffer = RenderSystem.getDevice().createBuffer(() -> "Description List", GpuBuffer.USAGE_COPY_DST, builtBuffer.getBuffer().remaining());
+				GpuBuffer indexBuffer = autoStorageIndexBuffer.getIndexBuffer(builtBuffer.getDrawParameters().indexCount());
+				RenderSystem.getDevice().createCommandEncoder().writeToBuffer(vertexBuffer.slice(), builtBuffer.getBuffer());
+				try (RenderPass renderPass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(() -> "Description List", framebuffer.getColorAttachmentView(), OptionalInt.empty(), framebuffer.getDepthAttachmentView(), OptionalDouble.empty())) {
+					renderPass.setPipeline(pipeline);
+					renderPass.setVertexBuffer(0, vertexBuffer);
+					renderPass.setIndexBuffer(indexBuffer, indexType);
+					renderPass.drawIndexed(0, 0, builtBuffer.getDrawParameters().indexCount(), 1);
+				}
+			}
+		}
 	}
 
 	public void renderScrollBar(BufferBuilder bufferBuilder) {
@@ -328,7 +328,7 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 				q = this.getY();
 			}
 
-			final int black = ColorHelper.fullAlpha(0);
+			final int black = 0xFF000000;
 			final int firstColor = ColorHelper.fromFloats(255, 128, 128, 128);
 			final int lastColor = ColorHelper.fromFloats(255, 192, 192, 192);
 			bufferBuilder.vertex(scrollbarStartX, this.getBottom(), 0.0F).color(black);
@@ -393,7 +393,7 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 				x += 11;
 			}
 
-			drawContext.drawTextWithShadow(textRenderer, text, x + indent, y, 0xAAAAAA);
+			drawContext.drawTextWithShadow(textRenderer, text, x + indent, y, 0xFFAAAAAA);
 		}
 
 		@Override

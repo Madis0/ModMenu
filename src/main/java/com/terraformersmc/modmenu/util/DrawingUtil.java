@@ -1,6 +1,5 @@
 package com.terraformersmc.modmenu.util;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.terraformersmc.modmenu.config.ModMenuConfig;
 import com.terraformersmc.modmenu.util.mod.Mod;
 import net.fabricmc.api.EnvType;
@@ -37,7 +36,6 @@ public class DrawingUtil {
 			color = 0xFFDD5656;
 		}
 
-		RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 		drawContext.fill(x, y, x + width, y + height, color);
 	}
 
@@ -71,7 +69,7 @@ public class DrawingUtil {
 				x1 += wrapWidth - CLIENT.textRenderer.getWidth(line);
 			}
 
-			drawContext.drawText(CLIENT.textRenderer, line, x1, y + i * CLIENT.textRenderer.fontHeight, color, true);
+			drawContext.drawTextWithShadow(CLIENT.textRenderer, line, x1, y + i * CLIENT.textRenderer.fontHeight, color);
 		}
 	}
 

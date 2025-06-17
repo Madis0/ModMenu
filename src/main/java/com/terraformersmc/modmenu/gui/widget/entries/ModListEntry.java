@@ -1,26 +1,24 @@
 package com.terraformersmc.modmenu.gui.widget.entries;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.terraformersmc.modmenu.ModMenu;
 import com.terraformersmc.modmenu.config.ModMenuConfig;
 import com.terraformersmc.modmenu.gui.widget.ModListWidget;
 import com.terraformersmc.modmenu.gui.widget.UpdateAvailableBadge;
 import com.terraformersmc.modmenu.util.DrawingUtil;
-import com.terraformersmc.modmenu.util.ModMenuScreenTexts;
 import com.terraformersmc.modmenu.util.mod.Mod;
 import com.terraformersmc.modmenu.util.mod.ModBadgeRenderer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Language;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.ColorHelper;
 
 public class ModListEntry extends AlwaysSelectedEntryListWidget.Entry<ModListEntry> {
 	public static final Identifier UNKNOWN_ICON = Identifier.ofVanilla("textures/misc/unknown_pack.png");
@@ -68,10 +66,19 @@ public class ModListEntry extends AlwaysSelectedEntryListWidget.Entry<ModListEnt
 			DrawingUtil.drawRandomVersionBackground(mod, drawContext, x, y, iconSize, iconSize);
 		}
 
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		GlStateManager._enableBlend();
-		drawContext.drawTexture(RenderLayer::getGuiTextured, this.getIconTexture(), x, y, 0.0F, 0.0F, iconSize, iconSize, iconSize, iconSize);
-		GlStateManager._disableBlend();
+		drawContext.drawTexture(
+			RenderPipelines.GUI_TEXTURED,
+			this.getIconTexture(),
+			x,
+			y,
+			0.0F,
+			0.0F,
+			iconSize,
+			iconSize,
+			iconSize,
+			iconSize,
+			ColorHelper.getWhite(1.0F)
+		);
 
 		Text name = Text.literal(mod.getTranslatedName());
 		StringVisitable trimmedName = name;
@@ -82,12 +89,11 @@ public class ModListEntry extends AlwaysSelectedEntryListWidget.Entry<ModListEnt
 			trimmedName = StringVisitable.concat(font.trimToWidth(name, maxNameWidth - font.getWidth(ellipsis)), ellipsis);
 		}
 
-		drawContext.drawText(font,
+		drawContext.drawTextWithShadow(font,
 			Language.getInstance().reorder(trimmedName),
 			x + iconSize + 3,
 			y + 1,
-			0xFFFFFF,
-			true
+			0xFFFFFFFF
 		);
 
 		var updateBadgeXOffset = 0;
@@ -116,7 +122,7 @@ public class ModListEntry extends AlwaysSelectedEntryListWidget.Entry<ModListEnt
 				(y + client.textRenderer.fontHeight + 2),
 				rowWidth - iconSize - 7,
 				2,
-				0x808080
+				0xFF808080
 			);
 		} else {
 			DrawingUtil.drawWrappedString(
@@ -126,7 +132,7 @@ public class ModListEntry extends AlwaysSelectedEntryListWidget.Entry<ModListEnt
 				(y + client.textRenderer.fontHeight + 2),
 				rowWidth - iconSize - 7,
 				2,
-				0x808080
+				0xFF808080
 			);
 		}
 
@@ -137,7 +143,7 @@ public class ModListEntry extends AlwaysSelectedEntryListWidget.Entry<ModListEnt
 				boolean hoveringIcon = mouseX - x < iconSize;
 				if (this.list.getParent().modScreenErrors.containsKey(modId)) {
 					drawContext.drawGuiTexture(
-						RenderLayer::getGuiTextured,
+						RenderPipelines.GUI_TEXTURED,
 						hoveringIcon ? ERROR_HIGHLIGHTED_ICON : ERROR_ICON,
 						x,
 						y,
@@ -146,12 +152,12 @@ public class ModListEntry extends AlwaysSelectedEntryListWidget.Entry<ModListEnt
 					);
 					if (hoveringIcon) {
 						Throwable e = this.list.getParent().modScreenErrors.get(modId);
-						this.list.getParent().setTooltip(this.client.textRenderer.wrapLines(ModMenuScreenTexts.configureError(modId, e), 175));
+						//this.list.getParent().setTooltip(this.client.textRenderer.wrapLines(ModMenuScreenTexts.configureError(modId, e), 175));
 					}
 				} else {
 					int v = hoveringIcon ? iconSize : 0;
 					drawContext.drawTexture(
-						RenderLayer::getGuiTextured,
+						RenderPipelines.GUI_TEXTURED,
 						MOD_CONFIGURATION_ICON,
 						x,
 						y,
@@ -160,7 +166,8 @@ public class ModListEntry extends AlwaysSelectedEntryListWidget.Entry<ModListEnt
 						iconSize,
 						iconSize,
 						textureSize,
-						textureSize
+						textureSize,
+						ColorHelper.getWhite(1.0F)
 					);
 				}
 			}
@@ -195,6 +202,7 @@ public class ModListEntry extends AlwaysSelectedEntryListWidget.Entry<ModListEnt
 		if (this.iconLocation == null) {
 			this.iconLocation = Identifier.of(ModMenu.MOD_ID, mod.getId() + "_icon");
 			NativeImageBackedTexture icon = mod.getIcon(list.getFabricIconHandler(), 64 * this.client.options.getGuiScale().getValue());
+			icon.setFilter(false, false);
 			this.client.getTextureManager().registerTexture(this.iconLocation, icon);
 		}
 
