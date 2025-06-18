@@ -550,10 +550,6 @@ public class ModsScreen extends Screen {
 		this.issuesButton.active = isMinecraft || selected.getMod().getIssueTracker() != null;
 	}
 
-	public double getScrollPercent() {
-		return scrollPercent;
-	}
-
 	public void updateScrollPercent(double scrollPercent) {
 		this.scrollPercent = scrollPercent;
 	}

@@ -18,7 +18,6 @@ import net.minecraft.client.gui.screen.narration.NarrationPart;
 import net.minecraft.client.gui.screen.option.CreditsAndAttributionScreen;
 import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.client.gui.widget.EntryListWidget;
-import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.texture.TextureSetup;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
@@ -58,12 +57,12 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 		this.parent = parent;
 		this.textRenderer = client.textRenderer;
 
-		if(copyFrom != null) {
+		if (copyFrom != null) {
 			updateSelectedModIfRequired(copyFrom.selectedMod);
 			setScrollY(copyFrom.getScrollY());
 		}
 
-		if(parent.getSelectedEntry() != null) {
+		if (parent.getSelectedEntry() != null) {
 			updateSelectedModIfRequired(parent.getSelectedEntry().getMod());
 		}
 	}
@@ -85,7 +84,7 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 
 	@Override
 	public void appendClickableNarrations(NarrationMessageBuilder builder) {
-		if(selectedMod != null) {
+		if (selectedMod != null) {
 			builder.put(
 				NarrationPart.TITLE,
 				selectedMod.getTranslatedName() + " " + selectedMod.getPrefixedVersion());
@@ -325,7 +324,7 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 							firstColor, lastColor, black,
 							drawContext.scissorStack.peekLast()
 					)
-		    );
+			);
 		}
 	}
 
