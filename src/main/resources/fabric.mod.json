@@ -97,7 +97,9 @@
     "MagnusHJensen",
     "Benjamin-Norton",
     "triphora",
-    "Pyrrha"
+    "Pyrrha",
+	"sakura-ryoko",
+	"gniftygnome"
   ],
   "description": "Adds a mod menu to view the list of mods you have installed.",
   "mixins": [
