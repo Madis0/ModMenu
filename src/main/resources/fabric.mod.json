@@ -99,7 +99,8 @@
     "triphora",
     "Pyrrha",
 	"sakura-ryoko",
-	"gniftygnome"
+	"gniftygnome",
+	"lowercasebtw"
   ],
   "description": "Adds a mod menu to view the list of mods you have installed.",
   "mixins": [
