@@ -1,11 +1,9 @@
 package com.terraformersmc.modmenu.gui.widget;
 
-
 import com.terraformersmc.modmenu.ModMenu;
 import com.terraformersmc.modmenu.config.ModMenuConfig;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class UpdateCheckerTexturedButtonWidget extends LegacyTexturedButtonWidget {
