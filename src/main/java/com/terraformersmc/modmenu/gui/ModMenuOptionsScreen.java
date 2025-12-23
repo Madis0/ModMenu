@@ -9,20 +9,20 @@ import net.minecraft.client.gui.screens.options.OptionsSubScreen;
 import net.minecraft.network.chat.Component;
 
 public class ModMenuOptionsScreen extends OptionsSubScreen {
-	public ModMenuOptionsScreen(Screen previous) {
-		super(previous, Minecraft.getInstance().options, Component.translatable("modmenu.options"));
-	}
+    public ModMenuOptionsScreen(Screen previous) {
+        super(previous, Minecraft.getInstance().options, Component.translatable("modmenu.options"));
+    }
 
-	@Override
-	protected void addOptions() {
-		if (this.list != null) {
-			this.list.addSmall(ModMenuConfig.asOptions());
-		}
-	}
+    @Override
+    protected void addOptions() {
+        if (this.list != null) {
+            this.list.addSmall(ModMenuConfig.asOptions());
+        }
+    }
 
-	@Override
-	public void removed() {
-		ModMenuConfigManager.save();
-		ModMenu.checkForUpdates();
-	}
+    @Override
+    public void removed() {
+        ModMenuConfigManager.save();
+        ModMenu.checkForUpdates();
+    }
 }

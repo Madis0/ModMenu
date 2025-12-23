@@ -18,59 +18,59 @@ import java.util.Map;
 import java.util.Objects;
 
 public class FabricIconHandler implements Closeable {
-	private static final Logger LOGGER = LoggerFactory.getLogger("Mod Menu | FabricIconHandler");
+    private static final Logger LOGGER = LoggerFactory.getLogger("Mod Menu | FabricIconHandler");
 
-	private final Map<Path, DynamicTexture> modIconCache = new HashMap<>();
+    private final Map<Path, DynamicTexture> modIconCache = new HashMap<>();
 
-	public DynamicTexture createIcon(ModContainer iconSource, String iconPath) {
-		try {
-			Path path = iconSource.getPath(iconPath);
-			DynamicTexture cachedIcon = getCachedModIcon(path);
-			if (cachedIcon != null) {
-				return cachedIcon;
-			}
+    public DynamicTexture createIcon(ModContainer iconSource, String iconPath) {
+        try {
+            Path path = iconSource.getPath(iconPath);
+            DynamicTexture cachedIcon = getCachedModIcon(path);
+            if (cachedIcon != null) {
+                return cachedIcon;
+            }
 
-			cachedIcon = getCachedModIcon(path);
-			if (cachedIcon != null) {
-				return cachedIcon;
-			}
+            cachedIcon = getCachedModIcon(path);
+            if (cachedIcon != null) {
+                return cachedIcon;
+            }
 
-			try (InputStream inputStream = Files.newInputStream(path)) {
-				NativeImage image = NativeImage.read(Objects.requireNonNull(inputStream));
-				Validate.validState(image.getHeight() == image.getWidth(), "Must be square icon");
-				DynamicTexture tex = new DynamicTexture(() -> Identifier.fromNamespaceAndPath(ModMenu.MOD_ID, path.toString()).toString(), image);
-				cacheModIcon(path, tex);
-				return tex;
-			}
-		} catch (IllegalStateException e) {
-			if (e.getMessage().equals("Must be square icon")) {
-				LOGGER.error("Mod icon must be a square for icon source {}: {}",
-					iconSource.getMetadata().getId(),
-					iconPath
-				);
-			}
+            try (InputStream inputStream = Files.newInputStream(path)) {
+                NativeImage image = NativeImage.read(Objects.requireNonNull(inputStream));
+                Validate.validState(image.getHeight() == image.getWidth(), "Must be square icon");
+                DynamicTexture tex = new DynamicTexture(() -> Identifier.fromNamespaceAndPath(ModMenu.MOD_ID, path.toString()).toString(), image);
+                cacheModIcon(path, tex);
+                return tex;
+            }
+        } catch (IllegalStateException e) {
+            if (e.getMessage().equals("Must be square icon")) {
+                LOGGER.error("Mod icon must be a square for icon source {}: {}",
+                        iconSource.getMetadata().getId(),
+                        iconPath
+                );
+            }
 
-			return null;
-		} catch (Throwable t) {
-			if (!iconPath.equals("assets/" + iconSource.getMetadata().getId() + "/icon.png")) {
-				LOGGER.error("Invalid mod icon for icon source {}: {}", iconSource.getMetadata().getId(), iconPath);
-			}
-			return null;
-		}
-	}
+            return null;
+        } catch (Throwable t) {
+            if (!iconPath.equals("assets/" + iconSource.getMetadata().getId() + "/icon.png")) {
+                LOGGER.error("Invalid mod icon for icon source {}: {}", iconSource.getMetadata().getId(), iconPath);
+            }
+            return null;
+        }
+    }
 
-	@Override
-	public void close() {
-		for (DynamicTexture tex : modIconCache.values()) {
-			tex.close();
-		}
-	}
+    @Override
+    public void close() {
+        for (DynamicTexture tex : modIconCache.values()) {
+            tex.close();
+        }
+    }
 
-	DynamicTexture getCachedModIcon(Path path) {
-		return modIconCache.get(path);
-	}
+    DynamicTexture getCachedModIcon(Path path) {
+        return modIconCache.get(path);
+    }
 
-	void cacheModIcon(Path path, DynamicTexture tex) {
-		modIconCache.put(path, tex);
-	}
+    void cacheModIcon(Path path, DynamicTexture tex) {
+        modIconCache.put(path, tex);
+    }
 }
