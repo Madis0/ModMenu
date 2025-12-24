@@ -7,7 +7,7 @@ import com.terraformersmc.modmenu.config.ModMenuConfig;
 import com.terraformersmc.modmenu.gui.ModsScreen;
 import com.terraformersmc.modmenu.gui.widget.ModMenuButtonWidget;
 import com.terraformersmc.modmenu.gui.widget.UpdateCheckerTexturedButtonWidget;
-import com.terraformersmc.modmenu.mixin.AccessorClickableWidget;
+import com.terraformersmc.modmenu.mixin.AccessorAbstractWidget;
 import com.terraformersmc.modmenu.util.UpdateCheckerUtil;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -151,7 +151,7 @@ public class ModMenuEventHandler {
     }
 
     public static boolean buttonHasTooltip(LayoutElement widget, Tooltip tooltip) {
-        if (widget instanceof Button && widget instanceof AccessorClickableWidget accessor) {
+        if (widget instanceof Button && widget instanceof AccessorAbstractWidget accessor) {
             return tooltip == accessor.getTooltip().get();
         } else {
             return false;
