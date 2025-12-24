@@ -30,6 +30,7 @@
   "authors": [
     "Prospector",
     "haykam821",
+    "gniftygnome",
     "TerraformersMC"
   ],
   "contributors": [
@@ -97,10 +98,9 @@
     "Benjamin-Norton",
     "triphora",
     "Pyrrha",
-	"sakura-ryoko",
-	"gniftygnome",
-	"lowercasebtw",
-	"tnoctua"
+    "sakura-ryoko",
+    "lowercasebtw",
+    "tnoctua"
   ],
   "description": "Adds a mod menu to view the list of mods you have installed.",
   "mixins": [
