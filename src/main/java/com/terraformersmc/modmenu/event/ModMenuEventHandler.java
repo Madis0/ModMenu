@@ -31,10 +31,10 @@ import java.util.List;
 
 public class ModMenuEventHandler {
     public static final Identifier MODS_BUTTON_TEXTURE = Identifier.fromNamespaceAndPath(ModMenu.MOD_ID, "textures/gui/mods_button.png");
-    private static KeyMapping MENU_KEY_BIND;
+    private static KeyMapping MENU_KEY_MAPPING;
 
     public static void register() {
-        MENU_KEY_BIND = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+        MENU_KEY_MAPPING = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.modmenu.open_menu",
                 InputConstants.Type.KEYSYM,
                 InputConstants.UNKNOWN.getValue(),
@@ -135,7 +135,7 @@ public class ModMenuEventHandler {
     }
 
     private static void onClientEndTick(Minecraft client) {
-        while (MENU_KEY_BIND.consumeClick()) {
+        while (MENU_KEY_MAPPING.consumeClick()) {
             client.setScreen(new ModsScreen(client.screen));
         }
     }
