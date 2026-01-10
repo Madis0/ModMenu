@@ -13,7 +13,7 @@ import java.net.http.HttpResponse;
 public class HttpUtil {
     private static final String USER_AGENT = buildUserAgent();
     private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
-            .executor(Util.backgroundExecutor())
+            .executor(Util.nonCriticalIoPool())
             .build();
 
     private HttpUtil() {
