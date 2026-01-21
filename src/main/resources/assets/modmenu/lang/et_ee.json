@@ -67,6 +67,7 @@
   "modmenu.downloadLink": "Laadi alla",
   
   "modmenu.bluesky": "Bluesky",
+  "modmenu.updateText.nonNumerical": "%s platvormil %s",
   "modmenu.buymeacoffee": "Buy Me a Coffee",
   "modmenu.coindrop": "Coindrop",
   "modmenu.crowdin": "Crowdin",
